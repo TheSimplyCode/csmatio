@@ -165,40 +165,34 @@ namespace csmatio.io
 
 			try
 			{
-				// skip CRC (at end) and zip format (0x789C at begin)
+				// Skip zip format header (2 bytes)
 				buf.Position += 2;
-				numOfBytes -= 6;
+				numOfBytes -= 6; // Account for header (2) and CRC (4)
 
-				var compressedStream = new MemoryStream();
-				int data;
-				do
-				{
-					data = buf.ReadByte();
-					if (data != -1)
-					{
-						compressedStream.WriteByte((byte)(data & 0x000000FF));
-					}
-				}
-				while (data != -1 && compressedStream.Length < numOfBytes);
-
-				// skip CRC
+				// Read compressed data in one operation instead of byte by byte
+				byte[] compressedData = new byte[numOfBytes];
+				buf.Read(compressedData, 0, numOfBytes);
+				
+				// Skip CRC (4 bytes)
 				buf.Position += 4;
-				compressedStream.Position = 0;
-				var decompressedStream = new MemoryStream();
-				using (var df = new DeflateStream(compressedStream, CompressionMode.Decompress))
+				
+				// Create memory streams with adequate capacity to avoid reallocations
+				using (var compressedStream = new MemoryStream(compressedData))
 				{
-					do
+					// Estimate decompressed size (usually compressed data is ~40-60% of original)
+					// A reasonable estimate helps avoid memory reallocations
+					var decompressedStream = new MemoryStream(numOfBytes * 3);
+					
+					// Use buffer for bulk copying instead of byte-by-byte
+					using (var df = new DeflateStream(compressedStream, CompressionMode.Decompress))
 					{
-						data = df.ReadByte();
-						if (data != -1)
-						{
-							decompressedStream.WriteByte((byte)(data & 0x000000FF));
-						}
+						// Copy in bulk using a buffer instead of byte-by-byte
+						df.CopyTo(decompressedStream, 81920); // Use 80KB buffer (optimal for most .NET I/O)
 					}
-					while (data != -1);
+					
+					decompressedStream.Position = 0;
+					return decompressedStream;
 				}
-				decompressedStream.Position = 0;
-				return decompressedStream;
 			}
 			catch (IOException e)
 			{
