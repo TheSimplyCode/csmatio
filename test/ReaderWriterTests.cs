@@ -1,17 +1,16 @@
-﻿using System;
-using System.CodeDom;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using csmatio.io;
+﻿using csmatio.io;
 using csmatio.types;
-using NUnit.Framework;
 
 namespace test
 {
     public class ReaderWriterTests
     {
         string _tempFileName;
+
+        public ReaderWriterTests(string tempFileName)
+        {
+            _tempFileName = tempFileName;
+        }
 
         [TearDown]
         public void TearDown()
@@ -167,7 +166,7 @@ namespace test
         {
 #if NET471
             var baseDir = TestContext.CurrentContext.TestDirectory;
-#elif NETCOREAPP2_0
+#elif NETCOREAPP2_0_OR_GREATER
              var baseDir = TestContext.CurrentContext.WorkDirectory;
 #endif
             var dir = Path.Combine(baseDir, "..", "..", "..", "..", "data");
