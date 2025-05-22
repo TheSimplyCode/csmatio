@@ -7,6 +7,12 @@ namespace test
     {
         string _tempFileName;
 
+        // Add a parameterless constructor for NUnit
+        public ReaderWriterTests()
+        {
+            _tempFileName = Path.GetTempFileName();
+        }
+
         public ReaderWriterTests(string tempFileName)
         {
             _tempFileName = tempFileName;
