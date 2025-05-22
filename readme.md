@@ -43,6 +43,12 @@ David A. Zier
 
 # CHANGE LOG #
 
+## r21, 2025-05-22 ##
+- update to visualstudio 2022
+- support for netstandard2.0, netstandard2.1, net6.0, net8.0
+- update tests to net 8.0
+- Optimize .mat file loading performance
+
 ## r20, 2018-04-22 ##
 
 - support netstandard (net471 + netcoreapp2.0)
